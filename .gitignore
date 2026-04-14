@@ -1,0 +1,21 @@
+# Vercel project metadata (contains project/org IDs — not for public repos)
+.vercel
+
+# Dependencies
+node_modules/
+
+# TypeScript build output
+dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment variables (secrets)
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db

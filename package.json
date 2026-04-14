@@ -1,0 +1,35 @@
+{
+  "name": "hd-engine",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "nodemon --exec ts-node src/index.ts",
+    "dev:watch": "nodemon --watch src --ext ts --exec ts-node src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "puppeteer": {
+    "skipDownload": true
+  },
+  "dependencies": {
+    "@sparticuz/chromium": "^143.0.4",
+    "astronomy-engine": "^2.1.19",
+    "axios": "^1.13.6",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "puppeteer": "^24.40.0",
+    "puppeteer-core": "^24.40.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.5.0",
+    "nodemon": "^3.1.14",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.2"
+  }
+}

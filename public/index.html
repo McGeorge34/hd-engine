@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HD Engine – Carta de Diseño Humano</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: #0f0f1a;
+      color: #e8e0d0;
+      min-height: 100vh;
+    }
+
+    /* ── Top bar ── */
+    header {
+      background: #1a1a2e;
+      border-bottom: 2px solid #c8960a;
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    header .logo { font-size: 28px; }
+    header h1 { font-size: 20px; color: #f0c040; letter-spacing: 1px; }
+    header p  { font-size: 12px; color: #aaa; margin-top: 2px; }
+
+    /* ── Main layout ── */
+    .container {
+      max-width: 820px;
+      margin: 36px auto;
+      padding: 0 20px;
+    }
+
+    /* ── Form card ── */
+    .form-card {
+      background: #1a1a2e;
+      border: 1px solid #2e2e4e;
+      border-radius: 12px;
+      padding: 28px 32px;
+    }
+    .form-card h2 {
+      font-size: 15px;
+      color: #c8960a;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #2e2e4e;
+      padding-bottom: 10px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .form-group.full { flex: 100%; }
+
+    label {
+      font-size: 11px;
+      color: #c8960a;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="number"] {
+      background: #0f0f1a;
+      border: 1px solid #3a3a5e;
+      border-radius: 6px;
+      color: #e8e0d0;
+      font-family: 'Georgia', serif;
+      font-size: 13px;
+      padding: 9px 12px;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+    input:focus {
+      outline: none;
+      border-color: #c8960a;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.7);
+    }
+    /* Hide number input spinners */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    input[type="number"] { -moz-appearance: textfield; text-align: center; }
+
+    /* Hour:Minute inline wrapper */
+    .time-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .time-group input { flex: 1; }
+    .time-sep {
+      font-size: 20px;
+      font-weight: bold;
+      color: #c8960a;
+      line-height: 1;
+      margin-top: 2px;
+    }
+
+    /* ── Place autocomplete ── */
+    .place-wrapper {
+      position: relative;
+    }
+    .place-wrapper input {
+      padding-right: 32px; /* room for spinner icon */
+    }
+    .place-searching {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 13px;
+      height: 13px;
+      border: 2px solid #c8960a;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    .place-wrapper.searching .place-searching { display: block; }
+
+    .place-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      background: #12122a;
+      border: 1px solid #3a3a5e;
+      border-radius: 8px;
+      z-index: 999;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      display: none;
+    }
+    .place-dropdown.open { display: block; }
+
+    .place-option {
+      padding: 9px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      color: #e8e0d0;
+      border-bottom: 1px solid #1e1e3a;
+      transition: background 0.12s;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .place-option:last-child { border-bottom: none; }
+    .place-option:hover,
+    .place-option.active {
+      background: #1e1e4a;
+    }
+    .place-option .city-name {
+      font-weight: bold;
+      color: #f0c040;
+    }
+    .place-option .city-detail {
+      font-size: 11px;
+      color: #888;
+    }
+    .place-no-results {
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #666;
+      text-align: center;
+    }
+
+    /* ── Buttons ── */
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 22px;
+    }
+    button {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Georgia', serif;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    button:active { transform: scale(0.97); }
+    button:disabled { opacity: 0.5; cursor: default; }
+
+    .btn-primary {
+      background: #c8960a;
+      color: #1a1a2e;
+      flex: 1;
+    }
+    .btn-primary:hover:not(:disabled) { opacity: 0.88; }
+
+    .btn-secondary {
+      background: #2e2e4e;
+      color: #f0c040;
+      border: 1px solid #3a3a5e;
+    }
+    .btn-secondary:hover:not(:disabled) { background: #3a3a5e; }
+
+    /* ── Status ── */
+    .status {
+      margin-top: 16px;
+      font-size: 12px;
+      min-height: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .status.loading { color: #c8960a; }
+    .status.error   { color: #e74c3c; }
+    .status.success { color: #2ecc71; }
+
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid #c8960a;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Result section ── */
+    .result-section {
+      margin-top: 28px;
+      display: none;
+    }
+    .result-section.visible { display: block; }
+
+    .result-label {
+      font-size: 11px;
+      color: #c8960a;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    iframe {
+      width: 100%;
+      height: 820px;
+      border: 1px solid #2e2e4e;
+      border-radius: 8px;
+      background: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">🔮</div>
+    <div>
+      <h1>HD Engine</h1>
+      <p>Generador de Cartas de Diseño Humano</p>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <div class="form-card">
+      <h2>Datos de Nacimiento</h2>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label for="name">Nombre completo</label>
+          <input type="text" id="name" placeholder="Ej. Jorge Borja Gonzalez" value="Jorge Borja Gonzalez"/>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="birthdate">Fecha de nacimiento</label>
+          <input type="date" id="birthdate" value="2000-04-03"/>
+        </div>
+        <div class="form-group">
+          <label>Hora de nacimiento (local)</label>
+          <div class="time-group">
+            <input type="number" id="hour"   min="0" max="23" placeholder="HH" value="13"/>
+            <span class="time-sep">:</span>
+            <input type="number" id="minute" min="0" max="59" placeholder="MM" value="09"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label for="birthplace">Lugar de nacimiento</label>
+          <!-- Autocomplete wrapper -->
+          <div class="place-wrapper" id="placeWrapper">
+            <input
+              type="text"
+              id="birthplace"
+              placeholder="Escribe una ciudad... ej. Guadalajara"
+              value="Scottsdale, Arizona, United States"
+              autocomplete="off"
+            />
+            <div class="place-searching" id="placeSpinner"></div>
+            <div class="place-dropdown" id="placeDropdown"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-primary" id="btnCalcular" onclick="calcular()">Calcular Carta</button>
+        <button class="btn-secondary" id="btnPDF" onclick="descargarPDF()" disabled>Descargar PDF</button>
+      </div>
+
+      <div class="status" id="status"></div>
+    </div>
+
+    <div class="result-section" id="resultSection">
+      <div class="result-label">Resultado</div>
+      <iframe id="resultFrame" title="Carta de Diseño Humano"></iframe>
+    </div>
+
+  </div>
+
+  <script>
+    // ── Refs ────────────────────────────────────────────────────────────────────
+    const statusEl    = document.getElementById('status');
+    const btnPDF      = document.getElementById('btnPDF');
+    const btnCalc     = document.getElementById('btnCalcular');
+    const resultSec   = document.getElementById('resultSection');
+    const frame       = document.getElementById('resultFrame');
+
+    const placeInput   = document.getElementById('birthplace');
+    const placeWrapper = document.getElementById('placeWrapper');
+    const placeSpinner = document.getElementById('placeSpinner');
+    const placeDropdown = document.getElementById('placeDropdown');
+
+    // ── Place Autocomplete ──────────────────────────────────────────────────────
+    let placeDebounce = null;
+    let placeResults  = [];
+    let activeIdx     = -1;
+
+    function openDropdown(items) {
+      placeResults = items;
+      activeIdx    = -1;
+
+      if (items.length === 0) {
+        placeDropdown.innerHTML = '<div class="place-no-results">Sin resultados</div>';
+      } else {
+        placeDropdown.innerHTML = items.map((item, i) => {
+          const parts = item.label.split(', ');
+          const city   = parts[0];
+          const detail = parts.slice(1).join(', ');
+          return `<div class="place-option" data-idx="${i}">
+            <span class="city-name">${city}</span>
+            ${detail ? `<span class="city-detail">${detail}</span>` : ''}
+          </div>`;
+        }).join('');
+
+        placeDropdown.querySelectorAll('.place-option').forEach(el => {
+          el.addEventListener('mousedown', e => {
+            e.preventDefault(); // prevent blur firing before click
+            selectPlace(parseInt(el.dataset.idx));
+          });
+        });
+      }
+
+      placeDropdown.classList.add('open');
+    }
+
+    function closeDropdown() {
+      placeDropdown.classList.remove('open');
+      activeIdx = -1;
+    }
+
+    function selectPlace(idx) {
+      const item = placeResults[idx];
+      if (!item) return;
+      placeInput.value = item.value;
+      closeDropdown();
+      placeInput.focus();
+    }
+
+    function highlightOption(idx) {
+      const opts = placeDropdown.querySelectorAll('.place-option');
+      opts.forEach(el => el.classList.remove('active'));
+      if (idx >= 0 && idx < opts.length) {
+        opts[idx].classList.add('active');
+        opts[idx].scrollIntoView({ block: 'nearest' });
+      }
+    }
+
+    async function searchPlaces(q) {
+      if (q.length < 2) { closeDropdown(); return; }
+
+      placeWrapper.classList.add('searching');
+      try {
+        const res  = await fetch(`/api/places/search?q=${encodeURIComponent(q)}`);
+        const data = await res.json();
+        openDropdown(data.results || []);
+      } catch {
+        closeDropdown();
+      } finally {
+        placeWrapper.classList.remove('searching');
+      }
+    }
+
+    // Input events
+    placeInput.addEventListener('input', () => {
+      clearTimeout(placeDebounce);
+      const q = placeInput.value.trim();
+      placeDebounce = setTimeout(() => searchPlaces(q), 320);
+    });
+
+    placeInput.addEventListener('keydown', e => {
+      const opts = placeDropdown.querySelectorAll('.place-option');
+      const isOpen = placeDropdown.classList.contains('open');
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (!isOpen && placeInput.value.length >= 2) { searchPlaces(placeInput.value.trim()); return; }
+        activeIdx = Math.min(activeIdx + 1, opts.length - 1);
+        highlightOption(activeIdx);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        activeIdx = Math.max(activeIdx - 1, 0);
+        highlightOption(activeIdx);
+      } else if (e.key === 'Enter') {
+        if (isOpen && activeIdx >= 0) {
+          e.preventDefault();
+          selectPlace(activeIdx);
+        }
+      } else if (e.key === 'Escape') {
+        closeDropdown();
+      }
+    });
+
+    placeInput.addEventListener('focus', () => {
+      if (placeInput.value.trim().length >= 2 && placeResults.length > 0) {
+        placeDropdown.classList.add('open');
+      }
+    });
+
+    placeInput.addEventListener('blur', () => {
+      // Small delay so mousedown on option fires first
+      setTimeout(closeDropdown, 150);
+    });
+
+    // Close on outside click
+    document.addEventListener('click', e => {
+      if (!placeWrapper.contains(e.target)) closeDropdown();
+    });
+
+    // ── Form helpers ───────────────────────────────────────────────────────────
+    function getFormData() {
+      const h = String(document.getElementById('hour').value).padStart(2, '0');
+      const m = String(document.getElementById('minute').value).padStart(2, '0');
+      return {
+        name:       document.getElementById('name').value.trim(),
+        birthdate:  document.getElementById('birthdate').value,
+        birthtime:  h + ':' + m,
+        birthplace: placeInput.value.trim(),
+      };
+    }
+
+    function setStatus(type, msg) {
+      statusEl.className = 'status ' + type;
+      if (type === 'loading') {
+        statusEl.innerHTML = `<div class="spinner"></div><span>${msg}</span>`;
+      } else {
+        statusEl.textContent = msg;
+      }
+    }
+
+    // ── Chart calculation ──────────────────────────────────────────────────────
+    let calculando = false;
+
+    function calcular() {
+      if (calculando) return;
+      const d = getFormData();
+      if (!d.name || !d.birthdate || !d.birthtime || !d.birthplace) {
+        setStatus('error', 'Por favor completa todos los campos.');
+        return;
+      }
+
+      calculando = true;
+      btnCalc.disabled = true;
+      btnPDF.disabled  = true;
+      setStatus('loading', 'Calculando carta...');
+
+      const url = '/api/chart/preview?' + new URLSearchParams(d).toString();
+
+      frame.onload = () => {
+        calculando = false;
+        btnCalc.disabled = false;
+        btnPDF.disabled  = false;
+        setStatus('success', 'Carta calculada correctamente.');
+      };
+
+      frame.onerror = () => {
+        calculando = false;
+        btnCalc.disabled = false;
+        setStatus('error', 'Error al cargar la carta. Verifica los datos.');
+      };
+
+      resultSec.classList.add('visible');
+      frame.src = '';
+      requestAnimationFrame(() => { frame.src = url; });
+    }
+
+    // ── PDF download ───────────────────────────────────────────────────────────
+    async function descargarPDF() {
+      const d = getFormData();
+      if (!d.name || !d.birthdate || !d.birthtime || !d.birthplace) {
+        setStatus('error', 'Por favor completa todos los campos.');
+        return;
+      }
+
+      btnCalc.disabled = true;
+      btnPDF.disabled  = true;
+      setStatus('loading', 'Generando PDF...');
+
+      try {
+        const res = await fetch('/api/chart', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(d),
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ error: res.statusText }));
+          throw new Error(err.error || 'Error del servidor');
+        }
+
+        const blob = await res.blob();
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href     = url;
+        a.download = (d.name.replace(/\s+/g, '_')) + '_HD_Chart.pdf';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+
+        setStatus('success', 'PDF descargado.');
+      } catch (e) {
+        setStatus('error', 'Error: ' + e.message);
+      } finally {
+        btnCalc.disabled = false;
+        btnPDF.disabled  = false;
+      }
+    }
+  </script>
+
+</body>
+</html>
